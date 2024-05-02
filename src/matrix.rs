@@ -5,6 +5,8 @@ use std::{
 
 use anyhow::{anyhow, Result};
 
+use crate::vector::Vector;
+
 pub struct Matrix<T> {
     data: Vec<T>,
     row: usize,
@@ -32,15 +34,34 @@ where
     let mut data = vec![T::default(); a.row * b.col];
     for i in 0..a.row {
         for j in 0..b.col {
-            for k in 0..a.row {
-                data[i * b.col + j] += a.data[i * a.col + k] * b.data[k * b.col + j];
-            }
+            let row = Vector::new(&a.data[i * a.col..(i + 1) * a.col]);
+            let col_data = b.data[j..]
+                .iter()
+                .step_by(b.col)
+                .copied()
+                .collect::<Vec<_>>();
+            let col = Vector::new(col_data);
+            data[i * b.col + j] = dot_product(row, col)?;
         }
     }
 
     Ok(Matrix::new(data, a.row, b.col))
 }
 
+pub fn dot_product<T>(row: Vector<T>, col: Vector<T>) -> Result<T>
+where
+    T: Copy + Default + Add<Output = T> + AddAssign + Mul<Output = T>,
+{
+    if row.len() != col.len() {
+        return Err(anyhow!("Dot product error: a.len != b.len"));
+    }
+
+    let mut sum = T::default();
+    for i in 0..row.len() {
+        sum += row[i] * col[i];
+    }
+    Ok(sum)
+}
 impl<T: Display> Display for Matrix<T> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{{")?;
@@ -81,7 +102,7 @@ mod tests {
         let c = multiply(&a, &b)?;
         assert_eq!(
             format!("{:?}", c),
-            "Matrix { data: {7 10, 19 28}, row: 2, col: 2 }"
+            "Matrix { data: {22 28, 49 64}, row: 2, col: 2 }"
         );
         Ok(())
     }
