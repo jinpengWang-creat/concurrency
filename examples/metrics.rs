@@ -9,7 +9,7 @@ const N: usize = 4;
 fn main() -> Result<()> {
     let metrics = Metrics::new();
 
-    println!("{:?}", metrics.snapshot());
+    println!("{}", metrics);
     for idx in 0..M {
         task_worker(idx, metrics.clone())?;
     }
@@ -20,7 +20,7 @@ fn main() -> Result<()> {
 
     loop {
         thread::sleep(Duration::from_secs(5));
-        println!("{:?}", metrics.snapshot());
+        println!("{}", metrics);
     }
 }
 
@@ -43,7 +43,7 @@ fn request_worker(metrics: Metrics) -> Result<()> {
 
         loop {
             thread::sleep(Duration::from_millis(rng.gen_range(50..800)));
-            let page = rng.gen_range(1..256);
+            let page = rng.gen_range(1..4);
             metrics.inc(format!("req.page.{}", page))?;
         }
         #[allow(unreachable_code)]
