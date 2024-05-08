@@ -1,13 +1,13 @@
 use std::{thread, time::Duration};
 
 use anyhow::Result;
-use concurrency::Metrics;
+use concurrency::CmapMetrics;
 use rand::Rng;
 
 const M: usize = 2;
 const N: usize = 4;
 fn main() -> Result<()> {
-    let metrics = Metrics::new();
+    let metrics = CmapMetrics::new();
 
     println!("{}", metrics);
     for idx in 0..M {
@@ -24,7 +24,7 @@ fn main() -> Result<()> {
     }
 }
 
-fn task_worker(idx: usize, metrics: Metrics) -> Result<()> {
+fn task_worker(idx: usize, metrics: CmapMetrics) -> Result<()> {
     thread::spawn(move || {
         let mut rng = rand::thread_rng();
         loop {
@@ -37,7 +37,7 @@ fn task_worker(idx: usize, metrics: Metrics) -> Result<()> {
     Ok(())
 }
 
-fn request_worker(metrics: Metrics) -> Result<()> {
+fn request_worker(metrics: CmapMetrics) -> Result<()> {
     thread::spawn(move || {
         let mut rng = rand::thread_rng();
 
