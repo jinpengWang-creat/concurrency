@@ -8,13 +8,14 @@ use tokio::{
 use tracing::{info, warn};
 
 const BUFF_SIZE: usize = 4096;
+
 #[tokio::main]
 async fn main() -> Result<()> {
     tracing_subscriber::fmt::init();
 
     let addr = "0.0.0.0:6379";
     let listener = TcpListener::bind(addr).await?;
-    info!("Dredis listener on {}", addr);
+    info!("Dredis listening on {}", addr);
 
     loop {
         let (stream, addr) = listener.accept().await?;
@@ -44,10 +45,12 @@ async fn process_redis_conn(mut stream: TcpStream, addr: SocketAddr) -> Result<(
                 continue;
             }
             Err(e) => {
+                warn!("Connection {} closed", addr);
                 return Err(e.into());
             }
         }
     }
     warn!("Connection {} closed", addr);
+
     Ok(())
 }
